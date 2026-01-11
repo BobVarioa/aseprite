@@ -690,10 +690,13 @@ int Dialog_newrow(lua_State* L)
   dlg->autoNewRow = false;
   if (lua_istable(L, 2)) {
     // Dialog:newrow{ always }
-    if (lua_is_key_true(L, 2, "always"))
-      dlg->autoNewRow = true;
+    int type = lua_getfield(L, 2, "always");
+    if (type != LUA_TNIL) {
+      dlg->autoNewRow = lua_toboolean(L, -1);
+    }
+    lua_pop(L, 1);
     // Dialog:newrow{ never }
-    int type = lua_getfield(L, 2, "never");
+    type = lua_getfield(L, 2, "never");
     if (type != LUA_TNIL) {
       dlg->neverNewRow = lua_toboolean(L, -1);
     }
