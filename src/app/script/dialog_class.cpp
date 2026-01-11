@@ -128,6 +128,7 @@ struct Dialog {
   ui::Grid* currentGrid;
   ui::HBox* hbox = nullptr;
   bool autoNewRow = false;
+  bool neverNewRow = false;
   WidgetsList mainWidgets;
   std::map<std::string, ui::Widget*> dataWidgets;
   std::map<std::string, ui::Widget*> labelWidgets;
@@ -593,8 +594,8 @@ int Dialog_add_widget(lua_State* L, Widget* widget)
 
   // This is to separate different kind of widgets without label in
   // different rows. Separator widgets will always create a new row.
-  if (dlg->lastWidgetType != widget->type() || dlg->autoNewRow ||
-      widget->type() == ui::kSeparatorWidget) {
+  if (!dlg->neverNewRow && (dlg->lastWidgetType != widget->type() || dlg->autoNewRow ||
+                            widget->type() == ui::kSeparatorWidget)) {
     dlg->lastWidgetType = widget->type();
     dlg->hbox = nullptr;
   }
@@ -691,6 +692,11 @@ int Dialog_newrow(lua_State* L)
     // Dialog:newrow{ always }
     if (lua_is_key_true(L, 2, "always"))
       dlg->autoNewRow = true;
+    // Dialog:newrow{ never }
+    int type = lua_getfield(L, 2, "never");
+    if (type != LUA_TNIL) {
+      dlg->neverNewRow = lua_toboolean(L, -1);
+    }
     lua_pop(L, 1);
   }
 
